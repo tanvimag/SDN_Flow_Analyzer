@@ -1,4 +1,4 @@
-# 🔗 SDN Project: Link Failure Detection and Recovery using Ryu Controller
+# 🔗 SDN Project: Multi Switch Flow Table Analyser
 
 ## Project Overview
 
@@ -40,7 +40,7 @@ The controller dynamically installs flow rules using OpenFlow (Ryu), and behavio
 - Wireshark  
 
 
-## STEP 1 — OPEN TERMINAL 1 (Controller)
+### STEP 1 — OPEN TERMINAL 1 (Controller)
 
 ```bash
 sudo mn -c
@@ -67,7 +67,7 @@ CONTROLLER READY
 Keep this terminal running
 
 ---
-##STEP 2 — OPEN TERMINAL 2 (Mininet)
+### STEP 2 — OPEN TERMINAL 2 (Mininet)
 
 ```bash
 sudo mn --topo linear,2,2 --controller=remote,ip=127.0.0.1,port=6653
@@ -79,8 +79,8 @@ Expected:
 mininet>
 ```
 ---
-##🧪 TESTING PHASE
-TEST 1 — NORMAL CONNECTIVITY
+## 🧪 TESTING PHASE
+#### TEST 1 — NORMAL CONNECTIVITY
 
 ```bash
 pingall
@@ -92,7 +92,7 @@ Expected:
 *** Results: 0% dropped
 ```
 
-TEST 2 — LINK FAILURE
+#### TEST 2 — LINK FAILURE
 
 ```bash
 py net.configLinkStatus('s1', 's2', 'down')
@@ -105,7 +105,7 @@ Expected:
 *** Results: ~66% dropped
 ```
 
-TEST 3 — LINK RECOVERY
+#### TEST 3 — LINK RECOVERY
 
 ```bash
 py net.configLinkStatus('s1', 's2', 'up')
@@ -120,7 +120,7 @@ Expected:
 ```
 
 ---
-##🔍 FLOW TABLE VERIFICATION
+##  🔍 FLOW TABLE VERIFICATION
 
 ```bash
 sh ovs-ofctl dump-flows s1
@@ -137,7 +137,7 @@ priority=0 actions=CONTROLLER:65535
 ✔ Confirms dynamic flow installation
 
 ---
-##📡 WIRESHARK ANALYSIS
+##  📡 WIRESHARK ANALYSIS
 
 Open Wireshark:
 ```bash
@@ -154,9 +154,11 @@ h1s1 ping -c 5 h1s2
 ```
 
 Apply filter:
+
 ```bash
 openflow
 ```
+
 Expected:
 
 ```bash
@@ -164,11 +166,12 @@ OFPT_PACKET_IN
 OFPT_PACKET_OUT
 OFPT_ECHO_REQUEST / REPLY
 ```
-Note:
-   FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
+
+##### Note:
+- FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
 
 ---
-##📈 THROUGHPUT ANALYSIS (IPERF)
+## 📈 THROUGHPUT ANALYSIS (IPERF)
 
 NORMAL CONDITION
 
@@ -216,7 +219,7 @@ Expected:
 ✔ Confirms recovery
 
 ---
-##📊 PERFORMANCE SUMMARY
+##  📊 PERFORMANCE SUMMARY
 
 Scenario	Packet Loss	Throughput
 
@@ -227,7 +230,7 @@ Link Failure	High	Connection fails
 Recovery	0%	~13 Gbps
 
 ---
-##🎯 KEY CONCEPT
+## 🎯 KEY CONCEPT
 
 - Controller does NOT directly detect failure
 - Failure → packet drops
@@ -237,7 +240,7 @@ Recovery	0%	~13 Gbps
 👉 This is Reactive SDN
 
 ---
-##✅ VALIDATION
+## ✅ VALIDATION
 
 The system was validated using:
 
@@ -247,7 +250,7 @@ The system was validated using:
 - iperf → throughput
 
 ---
-##🧾 CONCLUSION
+## 🧾 CONCLUSION
 
 This project demonstrates:
 
@@ -256,6 +259,6 @@ This project demonstrates:
 - Performance validation using throughput
 
 ---
-##👤 AUTHOR
+## 👤 AUTHOR
 
 Tanvi Magalur
