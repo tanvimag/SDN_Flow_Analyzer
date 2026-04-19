@@ -47,58 +47,65 @@ sudo mn -c
 sudo docker rm -f $(docker ps -aq) 2>/dev/null
 
 cd ~/SDN_CN_PROJECT/controller
+```
+Start Controller:
 
-####Start Controller:
-
+```bash
 sudo docker run -it --rm --network host \
 -v $(pwd):/app \
 -w /app \
 -e PYTHONPATH=/app \
 osrg/ryu \
 ryu-manager flowanalyser.py
-
-#####Expected:
+```
+###Expected:
 
 CONTROLLER READY
 
-######Keep this terminal running
+###Keep this terminal running
 
 ###STEP 2 — OPEN TERMINAL 2 (Mininet)
-
+```bash
 sudo mn --topo linear,2,2 --controller=remote,ip=127.0.0.1,port=6653
+```
 
 #####Expected:
-
+```bash
 mininet>
+```
 
 ##🧪 TESTING PHASE
 ###TEST 1 — NORMAL CONNECTIVITY
+```bash
 pingall
-
+```
 ####Expected:
 
 *** Results: 0% dropped
 ###TEST 2 — LINK FAILURE
+```bash
 py net.configLinkStatus('s1', 's2', 'down')
 pingall
-
+```
 ####Expected:
 
 *** Results: ~66% dropped
 
 ###TEST 3 — LINK RECOVERY
+```bash
 py net.configLinkStatus('s1', 's2', 'up')
 h1s1 ping -c 5 h1s2
 pingall
-
+```
 ####Expected:
 
 *** Results: 0% dropped
 
 ###🔍 FLOW TABLE VERIFICATION
+```bash
 sh ovs-ofctl dump-flows s1
 sh ovs-ofctl dump-flows s2
-
+```
 ####Expected:
 
 priority=1,in_port=...,dl_src=...,dl_dst=... actions=output:...
@@ -109,45 +116,47 @@ priority=0 actions=CONTROLLER:65535
 ###📡 WIRESHARK ANALYSIS
 
 Open Wireshark:
-
+```bash
 sudo wireshark
-
+```
 ####Select:
 
 Loopback: lo
 
 Start Capture → Generate traffic:
-
+```bash
 h1s1 ping -c 5 h1s2
-
+```
 ####Apply filter:
-
+```bash
 openflow
-
+```
 ####Expected:
-
+```bash
 OFPT_PACKET_IN
 OFPT_PACKET_OUT
 OFPT_ECHO_REQUEST / REPLY
-
+```
 ####Note:
 #####FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
 
 ###📈 THROUGHPUT ANALYSIS (IPERF)
 NORMAL CONDITION
+```bash
 h1s1 iperf -s &
 h1s2 iperf -c h1s1
-
+```
 #####Expected:
 
-#######~13 Gbits/sec bandwidth
+~13 Gbits/sec bandwidth
 
 ####✔ High throughput → network working efficiently
 
 #####LINK FAILURE
+```bash
 py net.configLinkStatus('s1', 's2', 'down')
 h1s2 iperf -c h1s1
-
+```
 ####Expected:
 
 tcp connect failed (No route to host)
@@ -155,9 +164,10 @@ tcp connect failed (No route to host)
 #####✔ Confirms network is broken
 
 #####RECOVERY
+```bash
 py net.configLinkStatus('s1', 's2', 'up')
 h1s2 iperf -c h1s1
-
+```
 ####Expected:
 
 ~13 Gbits/sec bandwidth restored
@@ -171,10 +181,10 @@ Link Failure	High	Connection fails
 Recovery	0%	~13 Gbps
 
 ###🎯 KEY CONCEPT
-Controller does NOT directly detect failure
-Failure → packet drops
-New packets → trigger packet_in
-Controller → installs new flows
+- Controller does NOT directly detect failure
+- Failure → packet drops
+- New packets → trigger packet_in
+- Controller → installs new flows
 
 👉 This is Reactive SDN
 
@@ -182,36 +192,20 @@ Controller → installs new flows
 
 The system was validated using:
 
-ping → connectivity
-ovs-ofctl → flow rules
-Wireshark → OpenFlow packets
-iperf → throughput
+- ping → connectivity
+- ovs-ofctl → flow rules
+- Wireshark → OpenFlow packets
+- iperf → throughput
 
 
-###RESULTS
-flow tables
-
-Wireshark packets
-
-iperf (normal, failure, recovery)
-## 📸 Results
-
-### Normal Connectivity
-![Normal](screenshots/pic2.png)
-
-### Link Failure
-![Failure](screenshots/pic3.png)
-
-### Link Recovery
-![Recovery](screenshots/pic5.png)
 ###🧾 CONCLUSION
 
-####This project demonstrates:
+This project demonstrates:
 
-####Dynamic SDN flow rule installation
-####Network behavior under failure and recovery
-####Performance validation using throughput
+- Dynamic SDN flow rule installation
+- Network behavior under failure and recovery
+- Performance validation using throughput
 
 
-###👤 AUTHOR
-###Tanvi Magalur
+##👤 AUTHOR
+Tanvi Magalur
