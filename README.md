@@ -39,9 +39,6 @@ The controller dynamically installs flow rules using OpenFlow (Ryu), and behavio
 - Ryu Controller  
 - Wireshark  
 
----
-
-## 🚀 COMPLETE EXECUTION GUIDE (STRICT ORDER)
 
 ### STEP 1 — OPEN TERMINAL 1 (Controller)
 
@@ -51,7 +48,7 @@ sudo docker rm -f $(docker ps -aq) 2>/dev/null
 
 cd ~/SDN_CN_PROJECT/controller
 
-Start Controller:
+####Start Controller:
 
 sudo docker run -it --rm --network host \
 -v $(pwd):/app \
@@ -60,41 +57,41 @@ sudo docker run -it --rm --network host \
 osrg/ryu \
 ryu-manager flowanalyser.py
 
-Expected:
+#####Expected:
 
 CONTROLLER READY
 
-Keep this terminal running
+######Keep this terminal running
 
 ###STEP 2 — OPEN TERMINAL 2 (Mininet)
 
 sudo mn --topo linear,2,2 --controller=remote,ip=127.0.0.1,port=6653
 
-Expected:
+#####Expected:
 
 mininet>
 
-###🧪 TESTING PHASE
-TEST 1 — NORMAL CONNECTIVITY
+##🧪 TESTING PHASE
+###TEST 1 — NORMAL CONNECTIVITY
 pingall
 
-Expected:
+####Expected:
 
 *** Results: 0% dropped
-TEST 2 — LINK FAILURE
+###TEST 2 — LINK FAILURE
 py net.configLinkStatus('s1', 's2', 'down')
 pingall
 
-Expected:
+####Expected:
 
 *** Results: ~66% dropped
 
-TEST 3 — LINK RECOVERY
+###TEST 3 — LINK RECOVERY
 py net.configLinkStatus('s1', 's2', 'up')
 h1s1 ping -c 5 h1s2
 pingall
 
-Expected:
+####Expected:
 
 *** Results: 0% dropped
 
@@ -102,7 +99,7 @@ Expected:
 sh ovs-ofctl dump-flows s1
 sh ovs-ofctl dump-flows s2
 
-Expected:
+####Expected:
 
 priority=1,in_port=...,dl_src=...,dl_dst=... actions=output:...
 priority=0 actions=CONTROLLER:65535
@@ -115,7 +112,7 @@ Open Wireshark:
 
 sudo wireshark
 
-Select:
+####Select:
 
 Loopback: lo
 
@@ -123,49 +120,49 @@ Start Capture → Generate traffic:
 
 h1s1 ping -c 5 h1s2
 
-Apply filter:
+####Apply filter:
 
 openflow
 
-Expected:
+####Expected:
 
 OFPT_PACKET_IN
 OFPT_PACKET_OUT
 OFPT_ECHO_REQUEST / REPLY
 
-Note:
-FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
+####Note:
+#####FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
 
 ###📈 THROUGHPUT ANALYSIS (IPERF)
 NORMAL CONDITION
 h1s1 iperf -s &
 h1s2 iperf -c h1s1
 
-Expected:
+#####Expected:
 
-~13 Gbits/sec bandwidth
+#######~13 Gbits/sec bandwidth
 
-✔ High throughput → network working efficiently
+####✔ High throughput → network working efficiently
 
-LINK FAILURE
+#####LINK FAILURE
 py net.configLinkStatus('s1', 's2', 'down')
 h1s2 iperf -c h1s1
 
-Expected:
+####Expected:
 
 tcp connect failed (No route to host)
 
-✔ Confirms network is broken
+#####✔ Confirms network is broken
 
-RECOVERY
+#####RECOVERY
 py net.configLinkStatus('s1', 's2', 'up')
 h1s2 iperf -c h1s1
 
-Expected:
+####Expected:
 
 ~13 Gbits/sec bandwidth restored
 
-✔ Confirms recovery
+#####✔ Confirms recovery
 
 ###📊 PERFORMANCE SUMMARY
 Scenario	Packet Loss	Throughput
@@ -191,39 +188,30 @@ Wireshark → OpenFlow packets
 iperf → throughput
 
 
-Include screenshots of:
-
+###RESULTS
 flow tables
+
 Wireshark packets
+
 iperf (normal, failure, recovery)
+## 📸 Results
 
-🧾 CONCLUSION
+### Normal Connectivity
+![Normal](screenshots/pic2.png)
 
-This project demonstrates:
+### Link Failure
+![Failure](screenshots/pic3.png)
 
-Dynamic SDN flow rule installation
-Network behavior under failure and recovery
-Performance validation using throughput
+### Link Recovery
+![Recovery](screenshots/pic5.png)
+###🧾 CONCLUSION
+
+####This project demonstrates:
+
+####Dynamic SDN flow rule installation
+####Network behavior under failure and recovery
+####Performance validation using throughput
 
 
-👤 AUTHOR
-Tanvi Magalur
-
-
----
-
-# ✅ After this
-
-Run:
-
-```bash
-git add README.md
-git commit -m "Updated README"
-git push
-🎯 Result
-
-Your repo will now:
-
-look exactly like your friend’s
-be clean + professional
-be ready for submission
+###👤 AUTHOR
+###Tanvi Magalur
