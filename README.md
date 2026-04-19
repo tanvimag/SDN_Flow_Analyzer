@@ -66,6 +66,7 @@ CONTROLLER READY
 
 Keep this terminal running
 
+---
 ##STEP 2 — OPEN TERMINAL 2 (Mininet)
 
 ```bash
@@ -77,7 +78,7 @@ Expected:
 ```bash
 mininet>
 ```
-
+---
 ##🧪 TESTING PHASE
 TEST 1 — NORMAL CONNECTIVITY
 
@@ -117,6 +118,8 @@ Expected:
 ```bash
 *** Results: 0% dropped
 ```
+
+---
 ##🔍 FLOW TABLE VERIFICATION
 
 ```bash
@@ -133,6 +136,7 @@ priority=0 actions=CONTROLLER:65535
 
 ✔ Confirms dynamic flow installation
 
+---
 ##📡 WIRESHARK ANALYSIS
 
 Open Wireshark:
@@ -163,7 +167,7 @@ OFPT_ECHO_REQUEST / REPLY
 Note:
    FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
 
-
+---
 ##📈 THROUGHPUT ANALYSIS (IPERF)
 
 NORMAL CONDITION
@@ -190,7 +194,9 @@ h1s2 iperf -c h1s1
 
 Expected:
 
+```bash
 tcp connect failed (No route to host)
+```
 
 ✔ Confirms network is broken
 
@@ -209,6 +215,7 @@ Expected:
 
 ✔ Confirms recovery
 
+---
 ##📊 PERFORMANCE SUMMARY
 
 Scenario	Packet Loss	Throughput
@@ -219,6 +226,7 @@ Link Failure	High	Connection fails
 
 Recovery	0%	~13 Gbps
 
+---
 ##🎯 KEY CONCEPT
 
 - Controller does NOT directly detect failure
@@ -228,7 +236,8 @@ Recovery	0%	~13 Gbps
 
 👉 This is Reactive SDN
 
-###✅ VALIDATION
+---
+##✅ VALIDATION
 
 The system was validated using:
 
@@ -237,8 +246,8 @@ The system was validated using:
 - Wireshark → OpenFlow packets
 - iperf → throughput
 
-
-###🧾 CONCLUSION
+---
+##🧾 CONCLUSION
 
 This project demonstrates:
 
@@ -246,7 +255,7 @@ This project demonstrates:
 - Network behavior under failure and recovery
 - Performance validation using throughput
 
-
+---
 ##👤 AUTHOR
 
 Tanvi Magalur
