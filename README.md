@@ -18,12 +18,10 @@ The controller dynamically installs flow rules using OpenFlow (Ryu), and behavio
 ---
 
 ## 🌐 Network Topology
-    h1s1        h1s2
-      |            |
-      s1 -------- s2
-      |            |
-    h2s1        h2s2
-
+    
+	h1 —— s1 —— s2 —— s3 —— h3
+        	|
+        	h2
 
 - 2 switches: s1, s2  
 - 4 hosts: h1s1, h2s1 (left), h1s2, h2s2 (right)  
