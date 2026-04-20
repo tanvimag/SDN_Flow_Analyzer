@@ -1,54 +1,55 @@
-# 🔗 SDN Project: Multi Switch Flow Table Analyser
+# 🔗 SDN Project: Multi-Switch Flow Table Analyzer using Ryu Controller
 
-## Project Overview
+## 📌 Project Overview
 
-This project demonstrates how a Software Defined Network (SDN) behaves under:
+This project demonstrates the behavior of a Software Defined Network (SDN) using a multi-switch topology.
 
-- Normal conditions  
-- Link failure  
-- Link recovery  
+The controller dynamically analyzes traffic and installs flow rules using OpenFlow.
 
-The controller dynamically installs flow rules using OpenFlow (Ryu), and behavior is verified using:
+The network is tested under:
+- Normal conditions
+- Link failure
+- Link recovery
 
-- Mininet (connectivity)  
-- Flow tables (ovs-ofctl)  
-- Wireshark (packet-level analysis)  
-- iperf (throughput analysis)  
+Verification tools:
+- Mininet
+- ovs-ofctl
+- Wireshark
+- iperf
 
 ---
 
 ## 🌐 Network Topology
-    
-	h1 —— s1 —— s2 —— s3 —— h3
-        	|
-        	h2
 
-- 2 switches: s1, s2  
-- 4 hosts: h1s1, h2s1 (left), h1s2, h2s2 (right)  
-- Link between s1 and s2 is the failure point  
+```text
+        h1        h2        h3
+         |         |         |
+        s1 ------- s2 ------- s3
+```
 
----
+### Description
+- Switches: s1, s2, s3
+- Hosts: h1, h2, h3
+- Failure link: s2 — s3
 
-## ⚙️ REQUIREMENTS
+## ⚙️ Requirements
+- Ubuntu (20.04 / 22.04)
+- Mininet
+- Docker
+- Ryu Controller
+- Wireshark
 
-- Ubuntu (20.04 / 22.04)  
-- Mininet  
-- Docker  
-- Ryu Controller  
-- Wireshark  
-
-
-### STEP 1 — OPEN TERMINAL 1 (Controller)
+## 🚀 Execution Steps
+### STEP 1 — Start Controller (Terminal 1)
 
 ```bash
 sudo mn -c
 sudo docker rm -f $(docker ps -aq) 2>/dev/null
-
-cd ~/SDN_CN_PROJECT/controller
 ```
-Start Controller:
 
 ```bash
+cd ~/SDN_CN_PROJECT/controller
+
 sudo docker run -it --rm --network host \
 -v $(pwd):/app \
 -w /app \
@@ -56,19 +57,10 @@ sudo docker run -it --rm --network host \
 osrg/ryu \
 ryu-manager flowanalyser.py
 ```
-Expected:
+### STEP 2 — Start Mininet (Terminal 2)
 
 ```bash
-CONTROLLER READY
-```
-
-Keep this terminal running
-
----
-### STEP 2 — OPEN TERMINAL 2 (Mininet)
-
-```bash
-sudo mn --topo linear,2,2 --controller=remote,ip=127.0.0.1,port=6653
+sudo mn --topo linear,3 --controller=remote,ip=127.0.0.1,port=6653
 ```
 
 Expected:
@@ -76,9 +68,10 @@ Expected:
 ```bash
 mininet>
 ```
----
-## 🧪 TESTING PHASE
-#### TEST 1 — NORMAL CONNECTIVITY
+
+## 🧪 Testing
+
+### Normal Connectivity
 
 ```bash
 pingall
@@ -87,68 +80,64 @@ pingall
 Expected:
 
 ```bash
-*** Results: 0% dropped
+0% packet loss
 ```
 
-#### TEST 2 — LINK FAILURE
+### Link Failure
 
 ```bash
-py net.configLinkStatus('s1', 's2', 'down')
+py net.configLinkStatus('s2','s3','down')
+pingall
+```
+
+Expected:
+
+- Partial packet loss
+- h3 becomes unreachable
+
+### Link Recovery
+
+```bash
+py net.configLinkStatus('s2','s3','up')
 pingall
 ```
 
 Expected:
 
 ```bash
-*** Results: ~66% dropped
+0% packet loss
 ```
 
-#### TEST 3 — LINK RECOVERY
-
-```bash
-py net.configLinkStatus('s1', 's2', 'up')
-h1s1 ping -c 5 h1s2
-pingall
-```
-
-Expected:
-
-```bash
-*** Results: 0% dropped
-```
-
----
-##  🔍 FLOW TABLE VERIFICATION
+## 🔍 Flow Table Verification
 
 ```bash
 sh ovs-ofctl dump-flows s1
 sh ovs-ofctl dump-flows s2
+sh ovs-ofctl dump-flows s3
 ```
 
 Expected:
 
 ```bash
-priority=1,in_port=...,dl_src=...,dl_dst=... actions=output:...
-priority=0 actions=CONTROLLER:65535
+priority=1 actions=output:...
+priority=0 actions=CONTROLLER
 ```
 
-✔ Confirms dynamic flow installation
+## 📡 Wireshark Analysis
 
----
-##  📡 WIRESHARK ANALYSIS
-
-Open Wireshark:
 ```bash
 sudo wireshark
 ```
-Select:
 
-Loopback: lo
+Select interface:
+```bash
+lo
+```
 
-Start Capture → Generate traffic:
+Generate traffic:
 
 ```bash
-h1s1 ping -c 5 h1s2
+h1 ping -c 5 h3
 ```
 
 Apply filter:
@@ -156,107 +145,80 @@ Apply filter:
 ```bash
 openflow
 ```
-
 Expected:
 
+- OFPT_PACKET_IN
+- OFPT_PACKET_OUT
+- OFPT_ECHO
+
+## 📈 Throughput Analysis (iperf)
+### Normal
+
 ```bash
-OFPT_PACKET_IN
-OFPT_PACKET_OUT
-OFPT_ECHO_REQUEST / REPLY
+h1 iperf -s &
+h3 iperf -c h1
 ```
 
-##### Note:
-- FLOW_MOD may not appear due to fast execution, but is verified using flow tables.
-
----
-## 📈 THROUGHPUT ANALYSIS (IPERF)
-
-NORMAL CONDITION
+### Failure
 
 ```bash
-h1s1 iperf -s &
-h1s2 iperf -c h1s1
-```
-
-Expected:
-
-```bash
-~13 Gbits/sec bandwidth
-```
-
-✔ High throughput → network working efficiently
-
-LINK FAILURE
-
-```bash
-py net.configLinkStatus('s1', 's2', 'down')
-h1s2 iperf -c h1s1
+py net.configLinkStatus('s2','s3','down')
+h3 iperf -c h1
 ```
 
 Expected:
-
 ```bash
-tcp connect failed (No route to host)
+Connection failed
 ```
 
-✔ Confirms network is broken
-
-RECOVERY
+### Recovery
 
 ```bash
-py net.configLinkStatus('s1', 's2', 'up')
-h1s2 iperf -c h1s1
+py net.configLinkStatus('s2','s3','up')
+h3 iperf -c h1
 ```
 
-Expected:
+## 📊 Performance Summary
+
+| Scenario | Packet Loss | Throughput |
+|----------|------------|-----------|
+| Normal   | 0%         | High      |
+| Failure  | Partial    | Fails     |
+| Recovery | 0%         | Restored  |
+
+
+## 🎯 Key Concept
+
+### Reactive SDN:
+
+- Controller installs flows dynamically
+- Packet arrival triggers flow rules
+- No pre-defined routing
+
+## 📁 Project Structure
 
 ```bash
-~13 Gbits/sec bandwidth restored
+SDN_CN_PROJECT/
+ ├── controller/
+ │   └── flowanalyser.py
+ ├── screenshots/
+ └── README.md
 ```
 
-✔ Confirms recovery
+## 📸 Results
 
----
-##  📊 PERFORMANCE SUMMARY
+![Normal](screenshots/pic2.jpeg)
+![Failure](screenshots/pic3.jpeg)
+![Recovery](screenshots/pic4.jpeg)
 
-Scenario	Packet Loss	Throughput
-
-Normal	0%	~13 Gbps
-
-Link Failure	High	Connection fails
-
-Recovery	0%	~13 Gbps
-
----
-## 🎯 KEY CONCEPT
-
-- Controller does NOT directly detect failure
-- Failure → packet drops
-- New packets → trigger packet_in
-- Controller → installs new flows
-
-👉 This is Reactive SDN
-
----
-## ✅ VALIDATION
-
-The system was validated using:
-
-- ping → connectivity
-- ovs-ofctl → flow rules
-- Wireshark → OpenFlow packets
-- iperf → throughput
-
----
-## 🧾 CONCLUSION
+## 🧾 Conclusion
 
 This project demonstrates:
 
-- Dynamic SDN flow rule installation
-- Network behavior under failure and recovery
-- Performance validation using throughput
+- Multi-switch SDN behavior
+- Dynamic flow installation
+- Network recovery after link failure
 
----
-## 👤 AUTHOR
+## 👤 Author
 
 Tanvi Magalur
