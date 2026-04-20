@@ -207,9 +207,35 @@ SDN_CN_PROJECT/
 
 ## 📸 Results
 
-![Normal](screenshots/pic2.jpeg)
-![Failure](screenshots/pic3.jpeg)
-![Recovery](screenshots/pic4.jpeg)
+Controller:
+![controller](screenshots/pic1.jpeg)
+
+Starting switches:
+![switches](screenshots/pic2.jpeg)
+
+Normal:
+![Normal](screenshots/pic3.jpeg)
+
+Failure:
+![Failure](screenshots/pic4.jpeg)
+
+Recovery:
+![Recovery](screenshots/pic5.jpeg)
+
+Dump flows:
+![Dumpflows](screenshots/pic6.jpeg)
+
+Performance:
+![iperf1](screenshots/pic7.jpeg)
+
+![iperf2](screenshots/pic8.jpeg)
+
+![iperf3](screenshots/pic9.jpeg)
+
+Wireshark:
+![wireshark1](screenshots/pic10.jpeg)
+
+![wireshark2](screenshots/pic11.jpeg)
 
 ## 🧾 Conclusion
 
